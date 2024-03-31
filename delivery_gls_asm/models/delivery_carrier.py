@@ -149,7 +149,11 @@ class DeliveryCarrier(models.Model):
             "remite_nombre": escape(
                 sender_partner.name or sender_partner.parent_id.name
             ),
-            "remite_direccion": escape(sender_partner.street or ""),
+            "remite_direccion": escape(
+                ", ".join(
+                    [x for x in (sender_partner.street, sender_partner.street2) if x]
+                )
+            ),
             "remite_poblacion": escape(sender_partner.city or ""),
             "remite_provincia": escape(sender_partner.state_id.name or ""),
             "remite_pais": "34",  # [mandatory] always 34=Spain
@@ -165,7 +169,9 @@ class DeliveryCarrier(models.Model):
             "destinatario_nombre": (
                 escape(consignee.name or consignee.commercial_partner_id.name or "")
             ),
-            "destinatario_direccion": escape(consignee.street or ""),
+            "destinatario_direccion": escape(
+                ", ".join([x for x in (consignee.street, consignee.street2) if x])
+            ),
             "destinatario_poblacion": escape(consignee.city or ""),
             "destinatario_provincia": escape(consignee.state_id.name or ""),
             "destinatario_pais": consignee.country_id.phone_code or "",
@@ -226,7 +232,11 @@ class DeliveryCarrier(models.Model):
             "remite_nombre": escape(
                 sender_partner.name or sender_partner.parent_id.name
             ),
-            "remite_direccion": escape(sender_partner.street) or "",
+            "remite_direccion": escape(
+                ", ".join(
+                    [x for x in (sender_partner.street, sender_partner.street2) if x]
+                )
+            ),
             "remite_poblacion": sender_partner.city or "",
             "remite_provincia": sender_partner.state_id.name or "",
             "remite_pais": (sender_partner.country_id.phone_code or ""),
@@ -243,7 +253,15 @@ class DeliveryCarrier(models.Model):
             "destinatario_nombre": escape(
                 receiving_partner.name or receiving_partner.parent_id.name
             ),
-            "destinatario_direccion": escape(receiving_partner.street) or "",
+            "destinatario_direccion": escape(
+                ", ".join(
+                    [
+                        x
+                        for x in (receiving_partner.street, receiving_partner.street2)
+                        if x
+                    ]
+                )
+            ),
             "destinatario_poblacion": receiving_partner.city or "",
             "destinatario_provincia": receiving_partner.state_id.name or "",
             "destinatario_pais": (receiving_partner.country_id.phone_code or ""),
