@@ -478,11 +478,6 @@ msgid "Previous declaration number"
 msgstr "Nº previo declaración"
 
 #. module: l10n_es_aeat_mod123
-#: model:ir.model.fields,field_description:l10n_es_aeat_mod123.field_l10n_es_aeat_mod123_report__rating_ids
-msgid "Ratings"
-msgstr ""
-
-#. module: l10n_es_aeat_mod123
 #: model:ir.model.fields,field_description:l10n_es_aeat_mod123.field_l10n_es_aeat_mod123_report__name
 msgid "Report identifier"
 msgstr "Identificador del informe"
@@ -584,6 +579,11 @@ msgstr "Tipo de actividad de excepción registrada."
 #: model:ir.model.fields,field_description:l10n_es_aeat_mod123.field_l10n_es_aeat_mod123_report__company_vat
 msgid "VAT number"
 msgstr "NIF"
+
+#. module: l10n_es_aeat_mod123
+#: model:ir.model.fields,field_description:l10n_es_aeat_mod123.field_l10n_es_aeat_mod123_report__valued_tax_line_ids
+msgid "Valued tax lines"
+msgstr ""
 
 #. module: l10n_es_aeat_mod123
 #: model:ir.model.fields,field_description:l10n_es_aeat_mod123.field_l10n_es_aeat_mod123_report__website_message_ids
@@ -773,13 +773,3 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:l10n_es_aeat_mod123.view_l10n_es_aeat_mod123_report_form
 msgid "[14] Resultado a ingresar ([12] - [13])"
 msgstr ""
-
-#, fuzzy
-#~ msgid "SMS Delivery error"
-#~ msgstr "Error en el envío del mensaje"
-
-#~ msgid "Last Modified on"
-#~ msgstr "Última modificación en"
-
-#~ msgid "Main Attachment"
-#~ msgstr "Adjunto principal"

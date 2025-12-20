@@ -323,18 +323,25 @@ class L10nEsAeatMod390Report(models.Model):
         store=True,
         string="[65] Result. rég. gral.",
     )
+    casilla_658 = fields.Monetary(
+        string="[658] Regularización cuotas art. 80. Cinco.5ª LIVA",
+    )
     casilla_662 = fields.Monetary(
         string="[662] Cuotas pendientes de compensación al término del ejercicio",
         help="[662] Cuotas pendientes de compensación generadas en el ejercicio "
         "y distintas de las incluidas en la casilla 97",
     )
+    casilla_84 = fields.Monetary(
+        compute="_compute_casilla_84",
+        store=True,
+        string="[84] Suma de resultados",
+    )
     casilla_85 = fields.Monetary(
         string="[85] Compens. ejercicio anterior",
-        help="Si en la autoliquidación del último período del ejercicio "
-        "anterior resultó un saldo a su favor y usted optó por la "
-        "compensación, consigne en esta casilla la cantidad a "
-        "compensar, salvo que la misma haya sido modificada por la "
-        "Administración, en cuyo caso se consignará esta última.",
+        help="Se consignará el importe de las cuotas pendientes de compensación "
+        "generadas en ejercicios anteriores y aplicadas en el ejercicio (es "
+        "decir, que se hubiesen consignado en la casilla 78 de alguna de las "
+        "autoliquidaciones del periodo).",
     )
     casilla_86 = fields.Monetary(
         compute="_compute_casilla_86",
@@ -427,7 +434,7 @@ class L10nEsAeatMod390Report(models.Model):
                         27,  # IVA otras operaciones sujeto pasivo
                         29,  # Modificación bases y cuotas
                         649,  # Modif. bases y cuotas intragrupo - no incluido aún
-                        31,  # Modif. bases y cuotas concurso ac. - no incluido aún
+                        31,  # Modif. bases y cuotas concurso ac.
                     )
                 ).mapped("amount")
             )
@@ -485,7 +492,7 @@ class L10nEsAeatMod390Report(models.Model):
                         28,  # IVA otras operaciones sujeto pasivo
                         30,  # Modificación bases y cuotas
                         650,  # Modif. bases y cuotas intragrupo - no incluido aún
-                        32,  # Modif. bases y cuotas concurso ac. - no incluido aún
+                        32,  # Modif. bases y cuotas concurso ac.
                     )
                 ).mapped("amount")
             )
@@ -506,7 +513,7 @@ class L10nEsAeatMod390Report(models.Model):
                         602,
                         42,  # Recargo de equivalencia
                         44,  # Modificación recargo de equivalencia
-                        46,  # Mod. recargo equiv. concurso - no incluido aún
+                        46,  # Mod. recargo equiv. concurso ac.
                     )
                 ).mapped("amount")
             )
@@ -679,9 +686,9 @@ class L10nEsAeatMod390Report(models.Model):
                 + report.casilla_59
                 + report.casilla_598
                 + sum(
-                    report.tax_line_ids.filtered(lambda x: x.field_number == 62).mapped(
-                        "amount"
-                    )
+                    report.tax_line_ids.filtered(
+                        lambda x: x.field_number in (61, 62)
+                    ).mapped("amount")
                 )
             )
 
@@ -690,11 +697,15 @@ class L10nEsAeatMod390Report(models.Model):
         for report in self:
             report.casilla_65 = report.casilla_47 - report.casilla_64
 
-    @api.depends("casilla_65", "casilla_85")
+    @api.depends("casilla_65", "casilla_658")
+    def _compute_casilla_84(self):
+        for report in self:
+            report.casilla_84 = report.casilla_65 + report.casilla_658
+
+    @api.depends("casilla_84", "casilla_85")
     def _compute_casilla_86(self):
         for report in self:
-            # It takes 65 instead of 84 + 659 as the rest are 0
-            report.casilla_86 = report.casilla_65 - report.casilla_85
+            report.casilla_86 = report.casilla_84 - report.casilla_85
 
     @api.depends("tax_line_ids", "tax_line_ids.amount")
     def _compute_casilla_108(self):
@@ -733,6 +744,27 @@ class L10nEsAeatMod390Report(models.Model):
                 _("You cannot make complementary reports for this model.")
             )
 
+    def _calculate_casilla_85(self, reports_303_this_year):
+        self.ensure_one()
+        report_303_first_period = reports_303_this_year.filtered(
+            lambda r: r.period_type in {"1T", "1"}
+        )
+        # Si no hay autoliquidaciones del primer periodo del ejercicio, asumimos
+        # que el total viene de ejercicios anteriores
+        if not report_303_first_period:
+            return sum(reports_303_this_year.mapped("cuota_compensar"))
+        # Obtenemos cuotas pendientes de compensación generadas en ejercicios anteriores
+        # Casilla [110] de la primera autoliquidación del ejercicio
+        remaining_cuota_compensar = report_303_first_period.potential_cuota_compensar
+        # Obtenemos total a compensar aplicado en el ejercicio
+        # Casilla [78] de todas las autoliquidaciones del ejercicio (suma)
+        total_cuota_compensar = sum(reports_303_this_year.mapped("cuota_compensar"))
+        # Si durante el ejercicio se ha aplicado más de remaining_cuota_compensar,
+        # entonces hemos aplicado el total durante el ejercicio.
+        # En caso contrario, solo hemos aplicado una parte de
+        # remaining_cuota_compensar, usamos la suma de las casillas [78]
+        return min(total_cuota_compensar, remaining_cuota_compensar)
+
     def calculate(self):
         res = super().calculate()
         for mod390 in self:
@@ -748,8 +780,9 @@ class L10nEsAeatMod390Report(models.Model):
             )
             if not reports_303_this_year:
                 continue
-            # casilla 85 = sumatorio de las casilla 78 de los periodos del año
-            casilla_85 = sum(reports_303_this_year.mapped("cuota_compensar"))
+            # casilla 85 = cuotas pendientes de compensación generadas en ejercicios
+            # anteriores y aplicadas en el ejercicio
+            casilla_85 = self._calculate_casilla_85(reports_303_this_year)
             # casilla 95 = sumatorio de las casilla 71 de los periodos del año que
             # sean a ingresar
             casilla_95 = sum(
@@ -765,18 +798,14 @@ class L10nEsAeatMod390Report(models.Model):
                     # Si salió a compensar, casilla 97 = casilla 71 del último periodo
                     # del año si fue a compensar
                     casilla_97 = abs(report_303_last_period.resultado_liquidacion)
-                elif report_303_last_period[0].result_type == "N":
-                    # casilla 97 = casilla 87 del último periodo del año si fue a
-                    # compensar si salio resultado cero, pero queda pendiente a
-                    # compensar
-                    casilla_97 = report_303_last_period.remaining_cuota_compensar
-                elif report_303_last_period[0].result_type in {"D", "V", "X"}:
-                    # casilla 98 = casilla 71 del último periodo del año si fue a
-                    # devolver
-                    casilla_98 = abs(report_303_last_period.resultado_liquidacion)
+                else:
                     # casilla 662 = casilla 87 del último periodo del año si no se
                     # incluyo en la casilla 97
                     casilla_662 = report_303_last_period.remaining_cuota_compensar
+                    if report_303_last_period[0].result_type in {"D", "V", "X"}:
+                        # Si salió a devolver, casilla 98 = casilla 71 del último
+                        #  periodo del año si fue a devolver
+                        casilla_98 = abs(report_303_last_period.resultado_liquidacion)
             mod390.update(
                 {
                     "casilla_85": casilla_85,
@@ -803,10 +832,10 @@ class L10nEsAeatMod390Report(models.Model):
         return super().button_confirm()
 
     def _get_move_line_domain(self, date_start, date_end, map_line):
-        """Consider Bankrupcy proceedings or uncollectible debt."""
+        """Consider bankruptcy proceedings or uncollectible debt."""
         res = super()._get_move_line_domain(date_start, date_end, map_line)
-        if map_line.field_number in {31, 32}:
+        if map_line.field_number in {31, 32, 45, 46}:
             res += [("move_id.is_bankrupcy_uncollectible_debt", "=", True)]
-        elif map_line.field_number in {29, 30, 99}:
+        elif map_line.field_number in {29, 30, 43, 44, 99}:
             res += [("move_id.is_bankrupcy_uncollectible_debt", "=", False)]
         return res

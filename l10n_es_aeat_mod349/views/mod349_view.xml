@@ -129,7 +129,7 @@
         <field name="model">l10n.es.aeat.mod349.partner_refund</field>
         <field name="arch" type="xml">
             <tree decoration-danger="not partner_refund_ok">
-                <field name="partner_refund_ok" invisible="1" />
+                <field name="partner_refund_ok" column_invisible="1" />
                 <field name="country_id" optional="show" />
                 <field name="partner_vat" optional="show" />
                 <field name="partner_id" optional="show" />
@@ -275,7 +275,7 @@
     <!-- ### MENU ACCESS ### -->
     <menuitem
         id="menu_aeat_mod349_report"
-        parent="l10n_es_aeat.menu_root_aeat"
+        parent="l10n_es_aeat.menu_l10n_es_aeat_submenu"
         action="action_l10n_es_aeat_mod349_report"
         sequence="349"
         name="AEAT 349 Model"

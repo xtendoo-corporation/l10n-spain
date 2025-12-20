@@ -22,15 +22,14 @@ class TestL10nEsAeatMod390Base(TestL10nEsAeatModBase):
         "S_IVA21B": (1400, 294),
         "S_IVA21B//neg": (-140, -29.4),
         "S_IVA21S": (1500, 315),
-        "S_IVA21ISP": (1600, 336),
         "S_REQ05": (1700, 8.5),
         "S_REQ014": (1800, 25.2),
         "S_REQ52": (1900, 98.8),
-        "S_IVA0_E": (2000, 0),
+        "S_IVA0_G_E": (2000, 0),
         "S_IVA_E": (2100, 0),
         "S_IVA_NS": (2200, 0),
         "S_IVA0_ISP": (2300, 0),
-        "S_IVA0_IC": (2400, 0),
+        "S_IVA0_G_I": (2400, 0),
         "S_IVA0_SP_I": (2500, 0),
         "S_IVA0": (2600, 0),
     }
@@ -50,7 +49,6 @@ class TestL10nEsAeatMod390Base(TestL10nEsAeatModBase):
         "P_IVA21_SP_EX": (130, 0),
         "P_IVA4_ISP": (140, 0),
         "P_IVA10_ISP": (150, 0),
-        "P_IVA21_ISP": (160, 0),
         "P_IVA4_SC": (210, 8.4),
         "P_IVA10_SC": (220, 22),
         "P_IVA21_SC": (230, 48.3),
@@ -100,13 +98,13 @@ class TestL10nEsAeatMod390Base(TestL10nEsAeatModBase):
             # Adquisiciones intracomunitarias de bienes - Cuota 21%
             ("26", 189.0),
             # IVA devengado otros supuestos de inversión del sujeto pasivo - Base
-            ("27", 2430.0),  # (110 + 120 + 130 + 140 + 150 + 160) * 3
+            ("27", 1950.0),  # (110 + 120 + 130 + 140 + 150) * 3
             # IVA devengado otros supuestos de inversión del sujeto pasivo - Cuota
-            ("28", 293.7),  # (4.4 + 12 + 27,3 + 5.6 + 15 + 33.6) * 3
+            ("28", 192.9),  # (4.4 + 12 + 27,3 + 5.6 + 15) * 3
             # Modificación de bases
-            ("29", -12450),  # -7140.0 - 4860.0 - 450.0
+            ("29", -12290),  # -7140.0 - 4860.0 - 290.0
             # Modificación de cuotas
-            ("30", -897.6 - 673.9),
+            ("30", -897.6 - 640.3),
             # Recargo de equivalencia - Base 0,5%
             ("35", 5100.0),
             # Recargo de equivalencia - Cuota 0,5%
@@ -116,7 +114,7 @@ class TestL10nEsAeatMod390Base(TestL10nEsAeatModBase):
             # Modificación recargo equivalencia - Cuota
             ("44", -132.5),
             # Rectificación de deducciones - Cuota
-            ("62", -1234.75),
+            ("62", -1201.15),
             # Volumen de operaciones
             ("99", 14280.0),
             # Operaciones realizadas por sujetos pasivos acogidos al régimen
@@ -181,9 +179,9 @@ class TestL10nEsAeatMod390Base(TestL10nEsAeatModBase):
             # IVA deducible operaciones corrientes bienes y servicios - Cuota 10%
             ("604", 222.0),
             # IVA deducible operaciones corrientes bienes y servicios - Base 21%
-            ("605", 2340.0),  # (230 + 130 + 160 + 260) * 3
+            ("605", 1860.0),  # (230 + 130 + 260) * 3
             # IVA deducible operaciones corrientes bienes y servicios - Cuota 21%
-            ("606", 491.4),  # 2340 * 0.21
+            ("606", 390.6),  # 1860 * 0.21
             # IVA deducible en importaciones de bienes corrientes - Base 10%
             ("619", 1050.0),
             # IVA deducible en importaciones de bienes corrientes - Cuota 10%
@@ -209,7 +207,7 @@ class TestL10nEsAeatMod390Base(TestL10nEsAeatModBase):
             # IVA deducible adquisiciones intracomunitarias servicios - Cuota 21%
             ("638", 378.0),
             # Rectificación de deducciones - Base
-            ("639", -10710.0),
+            ("639", -10550.0),
         ]
     )
 
@@ -284,11 +282,11 @@ class TestL10nEsAeatMod390(TestL10nEsAeatMod390Base):
                 f"Incorrect result in field {field} {ex.exception}",
             )
         # Check computed fields
-        self.assertAlmostEqual(self.model390.casilla_33, 17700.0, 2)
-        self.assertAlmostEqual(self.model390.casilla_34, 2252.0, 2)
-        self.assertAlmostEqual(self.model390.casilla_47, 2517.0, 2)
-        self.assertAlmostEqual(self.model390.casilla_48, 6660.0, 2)
-        self.assertAlmostEqual(self.model390.casilla_49, 797.4, 2)
+        self.assertAlmostEqual(self.model390.casilla_33, 17380.0, 2)
+        self.assertAlmostEqual(self.model390.casilla_34, 2184.8, 2)
+        self.assertAlmostEqual(self.model390.casilla_47, 2449.8, 2)
+        self.assertAlmostEqual(self.model390.casilla_48, 6180.0, 2)
+        self.assertAlmostEqual(self.model390.casilla_49, 696.6, 2)
         self.assertAlmostEqual(self.model390.casilla_50, 2880.0, 2)
         self.assertAlmostEqual(self.model390.casilla_51, 341.1, 2)
         self.assertAlmostEqual(self.model390.casilla_52, 3150.0, 2)
@@ -301,7 +299,7 @@ class TestL10nEsAeatMod390(TestL10nEsAeatMod390Base):
         self.assertAlmostEqual(self.model390.casilla_59, 891.0, 2)
         self.assertAlmostEqual(self.model390.casilla_597, 4500.0, 2)
         self.assertAlmostEqual(self.model390.casilla_598, 576.0, 2)
-        self.assertAlmostEqual(self.model390.casilla_64, 2408.45, 2)
+        self.assertAlmostEqual(self.model390.casilla_64, 2341.25, 2)
         self.assertAlmostEqual(self.model390.casilla_65, 108.55, 2)
         self.assertAlmostEqual(self.model390.casilla_86, 108.55, 2)
         self.assertAlmostEqual(self.model390.casilla_108, 41880.0, 2)
@@ -403,13 +401,34 @@ class TestL10nEsAeatMod390(TestL10nEsAeatMod390Base):
 
         model303_4T.return_last_period = True
         model303_4T.button_calculate()
+        model303_4T.potential_cuota_compensar = 760.85
+        self.model390_2023.button_calculate()
+        # Check casilla_85, casilla_95, casilla_97, casilla_98, casilla_662
+        self.assertAlmostEqual(self.model390_2023.casilla_85, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_95, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_97, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_98, 1121.7, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_662, 200.0, 2)
+
+        model303_1T.potential_cuota_compensar = 500.0
+        model303_1T.button_calculate()
+        self.model390_2023.button_calculate()
+        # Check casilla_85, casilla_95, casilla_97, casilla_98, casilla_662
+        self.assertAlmostEqual(self.model390_2023.casilla_85, 500.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_95, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_97, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_98, 1121.7, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_662, 200.0, 2)
+
+        model303_1T.potential_cuota_compensar = 1000.0
+        model303_1T.button_calculate()
         self.model390_2023.button_calculate()
         # Check casilla_85, casilla_95, casilla_97, casilla_98, casilla_662
         self.assertAlmostEqual(self.model390_2023.casilla_85, 560.85, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_95, 0.0, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_97, 0.0, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_98, 1121.7, 2)
-        self.assertAlmostEqual(self.model390_2023.casilla_662, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_662, 200.0, 2)
 
     def test_model_390_using_303_03(self):
         # Check use 303 activated, 303 reports exist and last period is to compensate
@@ -422,7 +441,6 @@ class TestL10nEsAeatMod390(TestL10nEsAeatMod390Base):
         self._invoice_sale_create("2023-01-01")
         self._invoice_sale_create("2023-04-01")
         self._invoice_sale_create("2023-07-01")
-        self._invoice_sale_create("2023-10-01")
         # Reports 303
         model303_1T = self.env["l10n.es.aeat.mod303.report"].create(
             {
@@ -469,14 +487,22 @@ class TestL10nEsAeatMod390(TestL10nEsAeatMod390Base):
         model303_1T.button_calculate()
         model303_2T.button_calculate()
         model303_3T.button_calculate()
-        model303_4T.potential_cuota_compensar = 905.25
-        model303_4T.cuota_compensar = 805.25
         model303_4T.button_calculate()
         self.model390_2023.button_calculate()
         # Check casilla_85, casilla_95, casilla_97, casilla_98, casilla_662
-        self.assertAlmostEqual(self.model390_2023.casilla_85, 805.25, 2)
-        self.assertAlmostEqual(self.model390_2023.casilla_95, 2415.75, 2)
-        self.assertAlmostEqual(self.model390_2023.casilla_97, 100.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_85, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_95, 1407.75, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_97, 560.85, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_98, 0.0, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_662, 0.0, 2)
+
+        model303_1T.potential_cuota_compensar = 2000.0
+        model303_1T.button_calculate()
+        self.model390_2023.button_calculate()
+        # Check casilla_85, casilla_95, casilla_97, casilla_98, casilla_662
+        self.assertAlmostEqual(self.model390_2023.casilla_85, 469.25, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_95, 938.5, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_97, 560.85, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_98, 0.0, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_662, 0.0, 2)
 
@@ -484,8 +510,8 @@ class TestL10nEsAeatMod390(TestL10nEsAeatMod390Base):
         model303_4T.button_calculate()
         self.model390_2023.button_calculate()
         # Check casilla_85, casilla_95, casilla_97, casilla_98, casilla_662
-        self.assertAlmostEqual(self.model390_2023.casilla_85, 905.25, 2)
-        self.assertAlmostEqual(self.model390_2023.casilla_95, 2415.75, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_85, 469.25, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_95, 938.5, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_97, 0.0, 2)
-        self.assertAlmostEqual(self.model390_2023.casilla_98, 100.00, 2)
+        self.assertAlmostEqual(self.model390_2023.casilla_98, 560.85, 2)
         self.assertAlmostEqual(self.model390_2023.casilla_662, 0.0, 2)

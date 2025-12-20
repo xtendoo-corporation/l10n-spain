@@ -241,13 +241,14 @@
                     <field name="result_type" />
                 </group>
                 </group>
-                <separator string="Tax lines" invisible="state == 'draft'" />
-                    <field
-                    name="tax_line_ids"
-                    nolabel="1"
-                    readonly="1"
-                    invisible="state == 'draft'"
-                />
+                <notebook invisible="state == 'draft'">
+                    <page string="Valued tax lines">
+                        <field name="valued_tax_line_ids" nolabel="1" readonly="1" />
+                    </page>
+                    <page string="Tax lines">
+                        <field name="tax_line_ids" nolabel="1" readonly="1" />
+                    </page>
+                </notebook>
             </group>
             <form position="inside">
                 <div class="oe_chatter">
@@ -288,7 +289,7 @@
     </record>
     <menuitem
         id="menu_aeat_mod303_report"
-        parent="l10n_es_aeat.menu_root_aeat"
+        parent="l10n_es_aeat.menu_l10n_es_aeat_submenu"
         action="action_l10n_es_aeat_mod303_report"
         sequence="303"
         name="AEAT 303 model"

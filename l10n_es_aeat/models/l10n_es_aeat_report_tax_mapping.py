@@ -20,6 +20,14 @@ class L10nEsAeatReportTaxMapping(models.AbstractModel):
         readonly=True,
         string="Tax lines",
     )
+    valued_tax_line_ids = fields.One2many(
+        comodel_name="l10n.es.aeat.tax.line",
+        inverse_name="res_id",
+        domain=lambda self: [("model", "=", self._name), ("amount", "!=", 0)],
+        auto_join=True,
+        readonly=True,
+        string="Valued tax lines",
+    )
 
     def calculate(self):
         res = super().calculate()
@@ -58,14 +66,7 @@ class L10nEsAeatReportTaxMapping(models.AbstractModel):
     def _prepare_tax_line_vals(self, map_line):
         self.ensure_one()
         move_lines = self._get_tax_lines(self.date_start, self.date_end, map_line)
-        if map_line.sum_type == "credit":
-            amount = sum(move_lines.mapped("credit"))
-        elif map_line.sum_type == "debit":
-            amount = sum(move_lines.mapped("debit"))
-        else:  # map_line.sum_type == 'both'
-            amount = sum(move_lines.mapped("credit")) - sum(move_lines.mapped("debit"))
-        if map_line.inverse:
-            amount = (-1.0) * amount
+        amount = map_line._get_amount_from_moves(move_lines)
         return {
             "model": self._name,
             "res_id": self.id,

@@ -85,7 +85,9 @@
             />
         </TaxIdentification>
         <PartyIdentification t-if="False" />
-        <AdministrativeCentres t-if="partner.facturae">
+        <AdministrativeCentres
+            t-if="partner.facturae and (partner.oficina_contable or partner.organo_gestor or partner.unidad_tramitadora or partner.organo_proponente)"
+        >
             <t t-call="l10n_es_facturae.administrative_center">
                 <t
                     t-set="centre_code"
@@ -121,7 +123,19 @@
         <LegalEntity t-if="buyer_type == 'J'">
             <CorporateName t-length="80" t-out="partner.name" />
             <TradeName t-length="40" t-out="partner.name" />
-            <RegistrationData t-if="False" />
+            <RegistrationData>
+                <Book t-out="company.facturae_registration_book" />
+                <RegisterOfCompaniesLocation
+                    t-out="company.facturae_registration_location"
+                />
+                <Sheet t-out="company.facturae_registration_sheet" />
+                <Folio t-out="company.facturae_registration_folio" />
+                <Section t-out="company.facturae_registration_section" />
+                <Volume t-out="company.facturae_registration_volume" />
+                <AdditionalRegistrationData
+                    t-out="company.facturae_registration_additional"
+                />
+            </RegistrationData>
             <t t-call="l10n_es_facturae.address_contact">
             </t>
         </LegalEntity>
@@ -132,8 +146,8 @@
             />
             <FirstSurname
                 t-length="40"
-                t-out="partner.lastname if partner._fields.get('lastname') else ''"
-            />
+                t-out="partner.lastname if partner._fields.get('lastname') else '.'"
+            /> <!-- Default value for FirstSurname is '.' as it cannot be empty-->
             <SecondSurname t-length="40" t-out="''" t-if="False" />
             <t t-call="l10n_es_facturae.address_contact">
             </t>
@@ -485,9 +499,19 @@
                             t-out="('%.2f' if version == '3_2' else '%.8f') % (sign * move.amount_total)"
                         />
                         <TotalPaymentsOnAccount t-if="False" />
-                        <AmountsWithheld t-if="False" />
+                        <AmountsWithheld t-if="move.facturae_withheld_percent > 0.0">
+                            <WithholdingReason
+                                t-out="move.facturae_withheld_reason or ''"
+                            />
+                            <WithholdingRate
+                                t-out="('%.4f' if version == '3_2' else '%.8f') % (move.facturae_withheld_percent * 100)"
+                            />
+                            <WithholdingAmount
+                                t-out="('%.2f' if version == '3_2' else '%.8f') % (move.facturae_withheld_amount)"
+                            />
+                        </AmountsWithheld>
                         <TotalExecutableAmount
-                            t-out="('%.2f' if version == '3_2' else '%.8f') % (sign * move.amount_total)"
+                            t-out="('%.2f' if version == '3_2' else '%.8f') % (sign * move.amount_total - (sign * move.facturae_withheld_amount))"
                         />
                         <TotalReimbursableExpenses t-if="False" />
                         <t t-if="version not in ('3_2', '3_2_1')">
@@ -606,10 +630,10 @@
                                         </TaxableBase>
                                         <TaxAmount>
                                             <TotalAmount
-                                                t-esc="('%.2f' if version == '3_2' else '%.8f') % (sign * (line.price_subtotal * (-line_tax.amount)))"
+                                                t-esc="('%.2f' if version == '3_2' else '%.8f') % (sign * (line.price_subtotal * (-line_tax.amount) / 100))"
                                             />
                                             <EquivalentInEuros
-                                                t-esc="'%.2f' % (sign * (line.price_subtotal * (-line_tax.amount) * euro_rate / currency_rate))"
+                                                t-esc="'%.2f' % (sign * (line.price_subtotal * (-line_tax.amount) / 100 * euro_rate / currency_rate))"
                                             />
                                         </TaxAmount>
                                     </Tax>

@@ -123,6 +123,9 @@ class L10nEsAeatReport(models.AbstractModel):
         string="L.R. VAT number",
         size=9,
         help="Legal Representative VAT number.",
+        compute="_compute_representative_vat",
+        store=True,
+        readonly=False,
     )
     year = fields.Integer(
         default=_default_year,
@@ -313,6 +316,11 @@ class L10nEsAeatReport(models.AbstractModel):
                         f"{report.year}-{month}-{monthrange(report.year, month)[1]}"
                     )
 
+    @api.depends("company_id")
+    def _compute_representative_vat(self):
+        for report in self:
+            report.representative_vat = report.company_id.representative_vat
+
     @api.depends("date_start")
     def _compute_export_config_id(self):
         for report in self:
@@ -321,7 +329,7 @@ class L10nEsAeatReport(models.AbstractModel):
 
     @api.model
     def _report_identifier_get(self, vals):
-        seq_name = "aeat%s-sequence" % self._aeat_number
+        seq_name = self._get_sequence_code()
         company_id = vals.get("company_id", self.env.user.company_id.id)
         seq = self.env["ir.sequence"].search(
             [("name", "=", seq_name), ("company_id", "=", company_id)], limit=1
@@ -443,6 +451,10 @@ class L10nEsAeatReport(models.AbstractModel):
     def _filter_phone(self, phone):
         return (phone or "").replace(" ", "")[-9:]
 
+    @api.model
+    def _get_sequence_code(self):
+        return f"aeat{self._aeat_number}-sequence"
+
     def _register_hook(self, companies=None):
         res = None
         if not companies:
@@ -456,7 +468,7 @@ class L10nEsAeatReport(models.AbstractModel):
                 % self._name
             )
         seq_obj = self.env["ir.sequence"]
-        sequence = "aeat%s-sequence" % aeat_num
+        sequence = self._get_sequence_code()
         if not companies:
             companies = self.env["res.company"].search([])
         for company in companies:
